@@ -1,0 +1,64 @@
+﻿
+<div class="port-schedule-details-wrapper">
+    @if (LoadingPort)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        if(PortVoyages?.Any() ?? false)
+        {
+            <ListView>
+                @foreach (var voyage in PortVoyages)
+                {
+                    <ListViewItem>
+                        <VoyageDetails Voyage="@voyage"/>
+                    </ListViewItem>
+                }
+            </ListView>
+        }
+        else
+        {
+            <span>There are no voyages in this port.</span>
+        }
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public Dictionary<string, object> ActivationParameters { get; set; }
+
+    [Inject]
+    private HttpClient HttpClient { get; set; }
+    [Inject]
+    private ExceptionHandlingService ExceptionHandlingService { get; set; }
+
+    private IEnumerable<PortVoyageDto> PortVoyages { get; set; }
+    private PortDto Port { get; set; }
+
+    private bool LoadingPort { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PortVoyages = Enumerable.Empty<PortVoyageDto>();
+
+        try
+        {
+            base.OnInitialized();
+            LoadingPort = true;
+            Port = (PortDto)(ActivationParameters["Port"]);
+            var requestUrl = $"https://www2.jadrolinija.hr/port-timetable/api/luke/{Port.PostajaOznaka}/putovanja";
+            PortVoyages = await HttpClient.GetFromJsonAsync<IEnumerable<PortVoyageDto>>(requestUrl);
+
+        }
+        catch (Exception ex)
+        {
+            await ExceptionHandlingService.HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            LoadingPort = false;
+        }
+    }
+}

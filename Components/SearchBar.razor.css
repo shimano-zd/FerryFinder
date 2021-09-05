@@ -1,0 +1,20 @@
+﻿.search-bar-title
+{
+    font-size:1.5rem;
+    color: var(--font-primary);
+}
+
+.search-bar-input{
+    padding: 5px;
+    color: var(--font-primary);
+    border-radius: 5px;
+    width: 100%;
+}
+input{
+    border-color: var(--bg-accent) !important;
+}
+input:focus{
+   
+    border-color: var(--bg-accent) !important;
+    border-radius: 5px;
+}

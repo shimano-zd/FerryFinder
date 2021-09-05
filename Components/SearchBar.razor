@@ -1,0 +1,35 @@
+﻿
+<div class="search-bar-wrapper" style="width: @(Width)">
+    <span class="search-bar-title">@Title</span>
+    <input type="text" 
+        @bind-value="@Value"
+        class="search-bar-input"
+        @onkeydown="@OnKeyDown" 
+        @oninput="@OnChange" />
+</div>
+
+@code {
+    [Parameter]
+    public string Width { get; set; } = "100%";
+
+    [Parameter]
+    public string Title { get; set; }
+
+    private string Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    private async Task OnKeyDown(KeyboardEventArgs args)
+    {
+        if(args?.Key == "Enter")
+        {
+            await OnSearch.InvokeAsync(Value);
+        }
+    }
+
+    private void OnChange(ChangeEventArgs args)
+    {
+        Value = args?.Value?.ToString();
+    }
+}

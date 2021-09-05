@@ -1,0 +1,10 @@
+﻿.ferry-list-wrapper {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr;
+    margin: auto;
+    overflow: hidden;
+    height: 100%;
+    padding: 20px;
+    width: 900px;
+}

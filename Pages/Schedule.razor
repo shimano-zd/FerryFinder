@@ -1,0 +1,105 @@
+﻿@page "/schedule"
+@page "/schedule/{PortCode}"
+
+<div class="schedule-page-wrapper @(Loading ? "with-loading" : "")">
+
+	@if (Loading)
+	{
+		<div style="height:100%; width:100%; display: grid; place-items:center;">
+			<LoadingSpinner />
+		</div>
+	}
+	else
+	{
+		<SearchBar OnSearch="@FilterPorts" Title="Search ports"></SearchBar>
+		<ListView>
+			@foreach (var port in FilteredPorts)
+			{
+				<ListViewItem OnClick="@port.OnClick">
+					<span>@port.PostajaNaziv</span>
+				</ListViewItem>
+			}
+		</ListView>
+	}
+
+</div>
+
+@code {
+
+	[Inject]
+	private HttpClient HttpClient { get; set; }
+
+	[Inject]
+	private ExceptionHandlingService ExceptionHandlingService { get; set; }
+
+	[Inject]
+	private PanelService PanelService { get; set; }
+
+	[Inject]
+	private NavigationManager NavigationManager { get; set; }
+
+	[Parameter]
+	public string PortCode { get; set; }
+
+	private List<PortDto> Ports { get; set; } = new List<PortDto>();
+	private List<PortDto> FilteredPorts { get; set; } = new List<PortDto>();
+	private bool Loading { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			await LoadPortList();
+
+			if (!string.IsNullOrWhiteSpace(PortCode))
+				LoadPort(PortCode);
+		}
+		catch (Exception ex)
+		{
+			await ExceptionHandlingService.HandleExceptionAsync(ex);
+		}
+		finally
+		{
+			Loading = false;
+		}
+	}
+
+	private async Task LoadPortList()
+	{
+		Ports.Clear();
+		Loading = true;
+		var getResult = await HttpClient.GetFromJsonAsync<IEnumerable<PortDto>>("https://www2.jadrolinija.hr/port-timetable/api/luke");
+		Ports = getResult.ToList();
+		foreach (var port in Ports)
+		{
+			port.OnClick = () => ShowPortInPanel(port);
+		}
+
+		FilteredPorts = Ports.ToList();
+	}
+
+	private void LoadPort(string portCode)
+	{
+		var matchingPort = Ports?.FirstOrDefault(x => x.PostajaOznaka == portCode);
+		ShowPortInPanel(matchingPort);
+	}
+
+	private void ShowPortInPanel(PortDto port)
+	{
+		PanelService.ShowPanel(typeof(PortDetails), new Dictionary<string, object>() 
+		{
+			{ "Port", port },
+			{ "Title", $"{port?.PostajaNaziv} Arrivals and departures"},
+			{ "ActivationUrl", NavigationManager.BaseUri + "schedule/" + port?.PostajaOznaka},
+			{ "RefererUrl", NavigationManager.BaseUri + "schedule" }
+		});
+	}
+
+	private void FilterPorts(string newValue)
+	{
+		if (string.IsNullOrWhiteSpace(newValue))
+			FilteredPorts = Ports.ToList();
+		else
+			FilteredPorts = Ports.Where(x => x.PostajaOznaka.Contains(newValue, StringComparison.InvariantCultureIgnoreCase) || x.PostajaNaziv.Contains(newValue, StringComparison.InvariantCultureIgnoreCase))?.ToList();
+	}
+}

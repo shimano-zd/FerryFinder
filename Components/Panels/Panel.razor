@@ -1,0 +1,56 @@
+﻿
+<div>
+    <div class="panel-overlay" @onclick="@Close">
+
+    </div>
+    <div class="ferry-panel-wrapper">
+        <div class="ferry-panel-title">
+            <img src="@Images.Close" @onclick="@Close" class="panel-close-button"/>
+            <span class="panel-title-text">@Title</span>
+        </div>
+        <DynamicComponent Type="@ComponentType" ActivationParameters="@ActivationParameters" />
+    </div>
+</div>
+@code {
+
+    [Parameter]
+    public Type ComponentType { get; set; }
+
+    [Parameter]
+    public Dictionary<string, object> ActivationParameters { get; set; }
+
+    [Inject]
+    private PanelService _panelService { get; set; }
+
+    [Inject]
+    private JSInteropService JsInterop { get; set; }
+
+    private string Title { get; set; }
+
+    private string ActivationUrl { get; set; }
+    private string RefererUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (ActivationParameters != null && ActivationParameters.ContainsKey("ActivationUrl"))
+            ActivationUrl = ActivationParameters["ActivationUrl"]?.ToString();
+
+
+        if (ActivationParameters != null && ActivationParameters.ContainsKey("Title"))
+            Title = ActivationParameters["Title"]?.ToString();
+
+        if (ActivationParameters != null && ActivationParameters.ContainsKey("RefererUrl"))
+            RefererUrl = ActivationParameters["RefererUrl"]?.ToString();
+
+        if (!string.IsNullOrEmpty(ActivationUrl))
+            _ = JsInterop.ReplaceUrl(ActivationUrl);
+    }
+
+    private void Close(MouseEventArgs args)
+    {
+        _ = args;
+        _panelService.ClosePanel();
+        if(!string.IsNullOrEmpty(RefererUrl))
+            _ = JsInterop.ReplaceUrl(RefererUrl);
+    }
+}

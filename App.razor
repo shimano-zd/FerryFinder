@@ -1,0 +1,42 @@
+
+@if (DataLoaded)
+{
+    <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(MainLayout)">
+               <NotFoundPage></NotFoundPage>
+            </LayoutView>
+        </NotFound>
+    </Router>
+}
+
+
+@code{
+    [Inject]
+    private HttpClient _httpClient { get; set; }
+
+    [Inject]
+    private FerryDataContainer _ferryDataContainer { get; set; }
+
+    [Inject]
+    private NavigationManager _navigationManager { get; set; }
+
+    private bool DataLoaded { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ferries = await _httpClient.GetFromJsonAsync<IEnumerable<FerryDto>>("ferry-data/ferries.json");
+        if (ferries != null)
+            _ferryDataContainer.LoadFerries(ferries);
+
+        DataLoaded = true;
+        StateHasChanged();
+
+        if (_navigationManager.Uri == _navigationManager.BaseUri)
+            _navigationManager.NavigateTo("home");
+
+    }
+}

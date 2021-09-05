@@ -1,0 +1,17 @@
+﻿.port-schedule-details-wrapper {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.port-schedule-details-wrapper ::deep .templated-list-item:hover{
+    color: var(--font-primary);
+    background-color: var(--bg-primary);
+    cursor: default;
+}

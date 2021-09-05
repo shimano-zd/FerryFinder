@@ -1,0 +1,26 @@
+﻿@page "/home"
+
+<div class="ferry-finder-index-wrapper">
+            <FerryFinderTitle />
+
+            <div class="index-choice">
+                <NavigationTile Title="Ferries" Image="@Images.Ferry" OnTileClick="@NavigateToFerries" />
+                <NavigationTile Title="Schedule" Image="@Images.Schedule" OnTileClick="@NavigateToSchedule" />
+            </div>
+</div>
+
+@code{
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    private void NavigateToFerries()
+    {
+        NavigationManager.NavigateTo("/ferries");
+    }
+
+    private void NavigateToSchedule()
+    {
+        NavigationManager.NavigateTo("/schedule");
+    }
+}

@@ -1,0 +1,88 @@
+﻿@page "/ferries"
+@page "/ferries/{Id:int}"
+
+<div class="ferry-list-wrapper">
+	<SearchBar OnSearch="@FilterFerries" Title="Search ferries" />
+	<ListView>
+		@foreach (var ferry in FilteredFerries)
+		{
+			<ListViewItem OnClick="@ferry.OnClick">
+				<span>@ferry.Name</span>
+			</ListViewItem>
+		}
+	</ListView>
+</div>
+
+@code {
+	[Inject]
+	private FerryDataContainer FerryDataContainer { get; set; }
+
+	[Inject]
+	private PanelService PanelService { get; set; }
+
+	[Inject]
+	private ExceptionHandlingService ExceptionHandlingService { get; set; }
+
+	[Inject]
+	private JSInteropService JsInterop { get; set; }
+
+	[Inject]
+	private NavigationManager NavigationManager { get; set; }
+
+
+	private List<FerryDto> FilteredFerries { get; set; }
+
+	[Parameter]
+	public int? Id { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			
+		LoadFerries();
+			if (Id != default)
+				LoadFerry(Id);
+		}catch(Exception ex)
+		{
+			await ExceptionHandlingService.HandleExceptionAsync(ex);
+		}
+	}
+
+	private void LoadFerries()
+	{
+		FilteredFerries = new List<FerryDto>();
+		foreach (var ferry in FerryDataContainer.Ferries)
+		{
+			ferry.OnClick = () => ShowFerryInPanel(ferry);
+			FilteredFerries.Add(ferry);
+		}
+	}
+
+	private void LoadFerry(int? ferryId)
+	{
+		var matchingFerry = FerryDataContainer.Ferries?.FirstOrDefault(x => x.Id == Id);
+		ShowFerryInPanel(matchingFerry);
+	}
+
+	private void ShowFerryInPanel(FerryDto ferry)
+	{
+		PanelService.ShowPanel(typeof(FerryDetails), new Dictionary<string, object>() 
+		{
+			{ "Ferry", ferry },
+			{ "Title", $"{ferry?.Name ?? "Not Found"}"},
+			{ "ActivationUrl", NavigationManager.BaseUri + "ferries/" + ferry?.Id.ToString()},
+			{ "RefererUrl", NavigationManager.BaseUri + "ferries"}
+		});
+	}
+
+	private void FilterFerries(string query)
+	{
+		if (string.IsNullOrWhiteSpace(query))
+			FilteredFerries = FerryDataContainer.Ferries.ToList();
+		else
+			FilteredFerries = FerryDataContainer.Ferries
+			.Where(x => x.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase))?.ToList();
+	}
+
+   }

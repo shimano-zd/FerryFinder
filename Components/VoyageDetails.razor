@@ -1,0 +1,77 @@
+﻿
+<div class="voyage-details-wrapper">
+    
+    <div class="voyage-start">
+        <div class="time-display">
+            @StartTime?.ToString("hh:mm")
+        </div>
+        <div class="ferry-name">
+            @($"{Voyage.PrijevoznoSredstvoNaziv} ({FerryType})")
+        </div>
+    </div>
+
+    <div class="voyage-trip">
+        <div class="ferry-image"><img alt="voyage" src="@Images.Ferry" class="ferry-image"/></div>
+        <div class="arrow">
+            @if (IsDeparture)
+            {
+                <img alt="departure" src="@Images.ArrowRight" class="arrow-image"/>
+            }
+            else
+            {
+                <img alt="arrival" src="@Images.ArrowLeft" class="arrow-image"/>
+            }
+        </div>
+        <div class="ferry-type">
+            @Direction
+        </div>
+    </div>
+
+    <div class="voyage-end">
+        <div class="port-display">
+            @EndPort
+        </div>
+        <div class="port-display">
+            @Voyage.OtokNaziv
+        </div>
+    </div>
+
+</div>
+@code {
+
+    [Parameter]
+    public PortVoyageDto Voyage { get; set; }
+
+    private bool IsDeparture { get; set; }
+    private string EndPort { get; set; }
+    private string FerryType { get; set; }
+    private DateTime? StartTime { get; set; }
+    private string Direction { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Voyage == null)
+            return;
+        
+        IsDeparture = Voyage.IndSmjera == "-->";
+        FerryType = Voyage.LinijaTipOznaka switch
+        {
+            "BRL" => "Brod",
+            "BBL" => "Katamaran",
+            _ => "Trajekt"
+            };
+
+        if (IsDeparture)
+        {
+            StartTime = Voyage.PolazakVrijeme;
+            EndPort = Voyage.LukaNakon;
+            Direction = "Departure";
+        }
+        else
+        {
+            StartTime = Voyage.DolazakVrijeme;
+            EndPort = Voyage.LukaPrije;
+            Direction = "Arrival";
+        }
+    }
+}

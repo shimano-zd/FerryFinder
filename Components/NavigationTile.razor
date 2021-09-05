@@ -1,0 +1,25 @@
+﻿
+<div class="ferry-choice-tile-wrapper" @onclick="@TileClicked">
+    <div class="icon-section">
+        <img src="@Image" alt="@Title" class="choice-image" />
+    </div>
+    <div class="title-section">
+        <span>@Title</span>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string Image { get; set; }
+
+    [Parameter]
+    public Action OnTileClick { get; set; }
+
+    private void TileClicked()
+    {
+        OnTileClick?.Invoke();
+    }
+}

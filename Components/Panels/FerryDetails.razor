@@ -1,0 +1,48 @@
+﻿@if (Ferry != null)
+{
+	<div class="ferry-details-panel-wrapper">
+
+		<img src="@Images.GetFerryImage(Ferry.Image)" class="ferry-picture" />
+
+		<div class="ferry-details-categories">
+			<span class="category-title">Name</span>
+			<span class="category-data"> @Ferry.Name</span>
+
+			<span class="category-title">Length</span>
+			<span class="category-data">@Ferry.Length.ToString("N2") m</span>
+
+			<span class="category-title">Width</span>
+			<span class="category-data">@Ferry.Width.ToString("N2") m</span>
+
+			<span class="category-title">Draft</span>
+			<span class="category-data">@Ferry.Draft.ToString("N2") m</span>
+
+			<span class="category-title">Max speed</span>
+			<span class="category-data">@Ferry.MaxSpeed.ToString("N2") knots</span>
+
+			<span class="category-title">Passenger capacity</span>
+			<span class="category-data">@Ferry.PassengerCapacity.ToString()</span>
+
+			<span class="category-title">Vehicle capacity</span>
+			<span class="category-data">@Ferry.VehicleCapacity.ToString()</span>
+		</div>
+	</div>
+}
+
+
+@code {
+
+
+	[Parameter]
+	public Dictionary<string, object> ActivationParameters { get; set; }
+
+	private FerryDto Ferry { get; set; }
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		if (ActivationParameters.ContainsKey("Ferry") || ActivationParameters["Ferry"] != null)
+			Ferry = (FerryDto)(ActivationParameters["Ferry"]);
+	}
+
+}

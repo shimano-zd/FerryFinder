@@ -1,0 +1,53 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+
+<div class="main">
+    <NavMenu />
+    <Content>
+        @Body
+    </Content>
+    <Footer />
+</div>
+
+@if (PanelVisible)
+{
+    <Panel ComponentType="@PanelType" ActivationParameters="@PanelActivationParameters"/>
+}
+
+
+@code{
+    [Inject]
+    private PanelService PanelService { get; set; }
+
+    private Type PanelType { get; set; }
+    private Dictionary<string, object> PanelActivationParameters { get; set; }
+
+    private bool PanelVisible { get; set; }
+
+    protected override void OnInitialized()
+    {
+        PanelService.OnPanelOpened += ShowPanel;
+        PanelService.OnPanelClosed += HidePanel;
+    }
+
+    private void ShowPanel(Type componentType, Dictionary<string, object> activationParameters)
+    {
+        PanelType = componentType;
+        PanelActivationParameters = activationParameters;
+
+        PanelVisible = true;
+        StateHasChanged();
+    }
+    private void HidePanel()
+    {
+        PanelVisible = false;
+        StateHasChanged();
+    }
+
+    void IDisposable.Dispose()
+    {
+        PanelService.OnPanelOpened -= ShowPanel;
+        PanelService.OnPanelClosed -= HidePanel;
+    }
+
+}
